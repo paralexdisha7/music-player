@@ -15,7 +15,6 @@ const MusicPlayer = () => {
             }
             const data = await response.json();
             console.log('Fetched music files:', data); // Log the fetched data
-            data.forEach(file => console.log(file.url)); // Log the URLs
             setMusicList(data);
         } catch (error) {
             console.error('Error fetching music files:', error);
@@ -28,7 +27,7 @@ const MusicPlayer = () => {
     }, []);
 
     const handleMusicSelect = (music) => {
-        console.log(music); // Log the selected music
+        console.log(music); // Add this line
         setSelectedMusic(music);
     };
 
@@ -63,6 +62,27 @@ const MusicPlayer = () => {
         setUploading(false);
     };
 
+    const handleDelete = async (key) => {
+        const confirmDelete = window.confirm('Are you sure you want to delete this song?');
+        if (!confirmDelete) return;
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/music/${key}`, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                alert('Song deleted successfully!');
+                fetchMusic(); // Refresh music list after delete
+            } else {
+                alert('Error deleting song');
+            }
+        } catch (error) {
+            console.error('Error during song deletion:', error);
+            alert('Delete failed. Please try again later.');
+        }
+    };
+
     return (
         <div className="flex flex-col h-screen w-screen bg-gray-200 p-6 overflow-hidden">
             {/* Music List */}
@@ -73,10 +93,15 @@ const MusicPlayer = () => {
                         {musicList.map((music) => (
                             <li
                                 key={music.key}
-                                className="cursor-pointer hover:bg-blue-200 transition duration-300 p-3 rounded-lg text-gray-700 font-semibold text-center"
-                                onClick={() => handleMusicSelect(music)}
+                                className="cursor-pointer hover:bg-blue-200 transition duration-300 p-3 rounded-lg text-gray-700 font-semibold text-center flex justify-between items-center"
                             >
-                                {music.key}
+                                <span onClick={() => handleMusicSelect(music)}>{music.key}</span>
+                                <button
+                                    onClick={() => handleDelete(music.key)}
+                                    className="text-red-500 hover:text-red-700"
+                                >
+                                    Delete
+                                </button>
                             </li>
                         ))}
                     </ul>

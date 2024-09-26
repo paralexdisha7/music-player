@@ -1,7 +1,7 @@
 // index.js
 
 const express = require('express');
-const { S3Client, ListObjectsV2Command } = require('@aws-sdk/client-s3');
+const { S3Client, ListObjectsV2Command, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 const cors = require('cors');
@@ -65,4 +65,21 @@ app.post('/api/upload', upload.array('music', 10), (req, res) => {
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
+});
+
+// API to delete a music file from S3
+app.delete('/api/music/:key', async (req, res) => {
+  const params = {
+    Bucket: process.env.S3_BUCKET_NAME,
+    Key: req.params.key, // Get the file key from the URL parameter
+  };
+
+  try {
+    const command = new DeleteObjectCommand(params);
+    await s3Client.send(command);
+    res.json({ message: 'File deleted successfully!' });
+  } catch (error) {
+    console.error('Error deleting file:', error.message);
+    res.status(500).send('Error deleting file');
+  }
 });
