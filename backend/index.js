@@ -10,7 +10,7 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors({ origin: 'http://13.201.124.53:5173' }));
 
 // Configure AWS SDK
 const s3Client = new S3Client({
